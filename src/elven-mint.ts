@@ -21,7 +21,7 @@ export const mint = async () => {
     // JSON wallet file
     const wallet = getWalletFile();
 
-    // Smart contract instance - SC responsible of minting
+    // Smart contract instance - SC responsible for minting
     const smartContract = getSmartContract();
 
     // Provider type based on initial configuration

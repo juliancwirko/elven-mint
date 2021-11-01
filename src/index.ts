@@ -2,6 +2,7 @@
 
 import { exit, argv } from 'process';
 import { mint } from './elven-mint';
+import { initCatchOnExit } from './catch-on-exit';
 import packageJson from '../package.json';
 
 const args = argv;
@@ -14,3 +15,6 @@ if (command === '--version' || command === '-v') {
 }
 
 mint();
+
+// Make sure that we will know where we were when unexpected exit occurs
+initCatchOnExit();

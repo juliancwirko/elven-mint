@@ -21,6 +21,7 @@ import BigNumber from 'bignumber.js';
 import ora from 'ora';
 import prompt from 'prompt';
 
+import { ProcessState } from './catch-on-exit';
 import * as config from './config';
 
 export const baseDir = cwd();
@@ -100,14 +101,14 @@ export const getProvider = () => {
   return chooseProvider(config.providerIds[config.currentChain]);
 };
 
-// Sync proper chain, for example devnet
+// Sync proper chain, for example, the devnet
 export const syncProviderConfig = async (provider: IProvider) => {
   return NetworkConfig.getDefault().sync(provider);
 };
 
 // Prepare user signer - we need to be able to sign transactions
-// using json wallet file and password
-// It can be also configured using pem file, but for now this will be enough
+// using JSON wallet file and password
+// It can also be configured using a pem file, but for now, this will be enough
 export const prepareUserSigner = (wallet: any, walletPassword: string) => {
   const signer = UserSigner.fromWallet(wallet, walletPassword);
 
@@ -140,8 +141,8 @@ export const makeTransactions = async (
         dna: entry.dna, // sha256 of the real image (png or svg)
       })}`
     );
-    // The best would be if your SC creates hash from attributes
-    // But anyway, the script will take it from json file if any
+    // The best will be if your SC creates a hash from attributes
+    // But anyway, the script will take it from JSON file if any
     const hash = BytesValue.fromUTF8(entry.hash || '');
 
     const transaction = smartContract.call({
@@ -182,6 +183,12 @@ export const makeTransactions = async (
 
     try {
       const txHash = await transaction.send(provider);
+      ProcessState.set({
+        no: index + 1,
+        name: entry.name,
+        txHash: txHash.toString(),
+      });
+
       await transaction.awaitExecuted(provider);
 
       const txStatus = transaction.getStatus();
@@ -190,12 +197,14 @@ export const makeTransactions = async (
 
       if (txStatus && txStatus.isInvalid()) {
         console.log(`Invalid! Tx ${index + 1}: `, txHash.toString());
+        exit();
       }
       if (txStatus && txStatus.isSuccessful()) {
         console.log(`Success! Tx ${index + 1}: `, txHash.toString());
       }
       if (txStatus && txStatus.isFailed()) {
         console.log(`Failed! Tx ${index + 1}: `, txHash.toString());
+        exit();
       }
     } catch (e) {
       console.log(e);
