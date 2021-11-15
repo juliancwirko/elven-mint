@@ -1,4 +1,4 @@
-### Elven Mint
+### Elven Mint (Work in progress)
 
 NFT minting on the Elrond blockchain using [erdjs](https://github.com/ElrondNetwork/elrond-sdk-erdjs) SDK. It requires deployed smart contract which implements `esdt_nft_create`.
 
