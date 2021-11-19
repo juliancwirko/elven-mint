@@ -169,7 +169,11 @@ export const makeTransactions = async (
   for (const [index, entry] of metadata.editions.entries()) {
     const token = BytesValue.fromUTF8(collectionTokenId);
     const name = BytesValue.fromUTF8(entry.name);
-    const uri = BytesValue.fromUTF8(entry.image.href);
+    const uri = BytesValue.fromUTF8(
+      metadataCidsList
+        ? entry.image.href
+        : entry.properties.base64SvgDataUri || ''
+    );
     const attributes = BytesValue.fromUTF8(
       `tags:${entry.properties.tags};metadata:${metadataString(entry)}`
     );
@@ -191,18 +195,23 @@ export const makeTransactions = async (
       gasLimit: new GasLimit(SystemConstants.MIN_TRANSACTION_GAS), // gas limit - initial value
     });
 
+    // MIN_TRANSACTION_GAS = 50_000;
+    // ESDT_ISSUE_GAS_LIMIT = 60_000_000;
+    // ESDT_TRANSFER_GAS_LIMIT = 500_000;
+    // ESDT_NFT_TRANSFER_GAS_LIMIT = 1_000_000;
+    // ESDT_BASE_GAS_LIMIT = 6_000_000;
+
     // TODO: check if this can be calculated in a better way?
-    const minTxGas = SystemConstants.MIN_TRANSACTION_GAS.valueOf();
-    const esdtIssueGas = SystemConstants.ESDT_ISSUE_GAS_LIMIT.valueOf();
+    const esdtNftTransferGasLimit =
+      SystemConstants.ESDT_NFT_TRANSFER_GAS_LIMIT.valueOf();
+    const minTransactionGas = SystemConstants.MIN_TRANSACTION_GAS.valueOf();
     const gasPerDataByte = NetworkConfig.getDefault().GasPerDataByte.valueOf();
+    const esdtBaseGasLimit = SystemConstants.ESDT_BASE_GAS_LIMIT.valueOf();
     const gasLimit =
-      esdtIssueGas +
-      transaction.getData().length() * gasPerDataByte +
-      token.getLength() * minTxGas +
-      name.getLength() * minTxGas +
-      uri.getLength() * minTxGas +
-      attributes.getLength() * minTxGas +
-      hash.getLength() * minTxGas;
+      esdtNftTransferGasLimit +
+      esdtBaseGasLimit +
+      attributes.getLength() * minTransactionGas +
+      transaction.getData().length() * gasPerDataByte;
 
     transaction.setGasLimit(new GasLimit(gasLimit));
 
