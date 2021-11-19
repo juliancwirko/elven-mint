@@ -24,6 +24,25 @@ import prompt from 'prompt';
 import { ProcessState } from './catch-on-exit';
 import * as config from './config';
 
+export interface Metadata {
+  name: string;
+  description: string;
+  properties: {
+    edition: number;
+    attributes: {
+      trait_type: string;
+      value: string;
+    }[];
+    base64SvgDataUri?: string;
+    hash?: string;
+    tags?: string;
+  };
+  image: {
+    href: string;
+    hash: string;
+  };
+}
+
 export const baseDir = cwd();
 
 export const getWalletPassword = async () => {
@@ -69,31 +88,27 @@ export const getSmartContract = () => {
   }
 };
 
-export const getWalletFile = () => {
-  const walletFilePath = `${baseDir}/${config.walletFileName}`;
-
-  try {
-    accessSync(walletFilePath, constants.R_OK | constants.W_OK);
-  } catch (err) {
-    console.error('No access to the wallet JSON file!');
-    exit();
-  }
-
-  const rawFile = readFileSync(walletFilePath);
-  return JSON.parse(rawFile.toString('utf8'));
+const fileTypeMap: Record<string, string> = {
+  wallet: config.walletFileName,
+  metadataSummary: config.metadataFileName,
+  metadataCids: config.metadataCidsListFileName,
 };
 
-export const getMetadataFile = () => {
-  const metadataFilePath = `${baseDir}/${config.metadataFileName}`;
+export const getFileContents = (
+  type: 'wallet' | 'metadataSummary' | 'metadataCids',
+  preventExit = false
+) => {
+  const filePath = `${baseDir}/${fileTypeMap[type]}`;
 
   try {
-    accessSync(metadataFilePath, constants.R_OK | constants.W_OK);
+    accessSync(filePath, constants.R_OK | constants.W_OK);
   } catch (err) {
-    console.error('No access to the metadata JSON file!');
+    if (preventExit) return null;
+    console.error(`No access to the ${type} JSON file!`);
     exit();
   }
 
-  const rawFile = readFileSync(metadataFilePath);
+  const rawFile = readFileSync(filePath);
   return JSON.parse(rawFile.toString('utf8'));
 };
 
@@ -120,6 +135,15 @@ export const prepareUserAccount = async (address: string) => {
   return new Account(new Address(address));
 };
 
+export const getProperMetadataCid = (
+  metadataCidsList: { name: string; cid: string }[],
+  editionNumber: number
+) => {
+  return metadataCidsList.find((item) =>
+    item.name.includes(editionNumber.toString())
+  )?.cid;
+};
+
 export const makeTransactions = async (
   userAccount: Account,
   provider: IProvider,
@@ -128,22 +152,30 @@ export const makeTransactions = async (
   createNftFunctionName: string,
   collectionTokenId: string
 ) => {
-  const metadata = getMetadataFile();
+  const metadata: { editions: Metadata[] } = getFileContents('metadataSummary');
+  const metadataCidsList = getFileContents('metadataCids', true);
+
+  const metadataString = (entry: Metadata) => {
+    if (metadataCidsList) {
+      return getProperMetadataCid(metadataCidsList, entry.properties.edition);
+    }
+    return JSON.stringify({
+      description: entry.description,
+      attributes: entry.properties.attributes,
+      hash: entry.image.hash, // sha256 of the real image (png or svg)
+    });
+  };
 
   for (const [index, entry] of metadata.editions.entries()) {
     const token = BytesValue.fromUTF8(collectionTokenId);
     const name = BytesValue.fromUTF8(entry.name);
-    const uri = BytesValue.fromUTF8(entry.image);
+    const uri = BytesValue.fromUTF8(entry.image.href);
     const attributes = BytesValue.fromUTF8(
-      `metadata:${JSON.stringify({
-        description: entry.description,
-        traits: entry.attributes,
-        dna: entry.dna, // sha256 of the real image (png or svg)
-      })}`
+      `tags:${entry.properties.tags};metadata:${metadataString(entry)}`
     );
     // The best will be if your SC creates a hash from attributes
     // But anyway, the script will take it from JSON file if any
-    const hash = BytesValue.fromUTF8(entry.hash || '');
+    const hash = BytesValue.fromUTF8(entry.properties.hash || '');
 
     const transaction = smartContract.call({
       func: new ContractFunction(createNftFunctionName),
