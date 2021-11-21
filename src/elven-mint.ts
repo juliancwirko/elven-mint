@@ -5,7 +5,7 @@ import {
   syncProviderConfig,
   prepareUserAccount,
   prepareUserSigner,
-  getWalletFile,
+  getFileContents,
   getSmartContract,
   getProvider,
   makeTransactions,
@@ -19,7 +19,7 @@ export const mint = async () => {
     const password = await getWalletPassword();
 
     // JSON wallet file
-    const wallet = getWalletFile();
+    const wallet = getFileContents('wallet');
 
     // Smart contract instance - SC responsible for minting
     const smartContract = getSmartContract();
