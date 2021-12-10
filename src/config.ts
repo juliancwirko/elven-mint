@@ -35,6 +35,10 @@ export const metadataFileName =
 export const metadataCidsListFileName =
   customConfig?.config?.metadataCidsListFileName || 'metadataList.json';
 
+// This option will allow claiming tokens after minting. They will be sent to the caller's wallet after mint
+export const claimTokensAfterMint =
+  customConfig?.config?.claimTokensAfterMint || false;
+
 export const providerIds: { [key: string]: string } = {
   local: 'local-testnet',
   testnet: 'elrond-testnet',

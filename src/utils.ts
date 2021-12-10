@@ -12,10 +12,10 @@ import {
   ContractFunction,
   GasLimit,
   BytesValue,
-  U32Value,
   BigUIntValue,
   ISigner,
   SystemConstants,
+  BooleanValue,
 } from '@elrondnetwork/erdjs';
 import BigNumber from 'bignumber.js';
 import ora from 'ora';
@@ -159,11 +159,16 @@ export const makeTransactions = async (
     if (metadataCidsList) {
       return getProperMetadataCid(metadataCidsList, entry.properties.edition);
     }
-    return JSON.stringify({
-      description: entry.description,
-      attributes: entry.properties.attributes,
-      hash: entry.image.hash, // sha256 of the real image (png or svg)
-    });
+    // Fallback when you won't use 'metadataCidsList' (ipfs CIDs)
+    // metadata fields will be hardcoded and encoded using base64
+    return Buffer.from(
+      JSON.stringify({
+        onChainMeta: true,
+        description: entry.description,
+        attributes: JSON.stringify(entry.properties.attributes),
+        hash: entry.image.hash, // sha256 of the real image (png or svg)
+      })
+    ).toString('base64');
   };
 
   for (const [index, entry] of metadata.editions.entries()) {
@@ -174,6 +179,7 @@ export const makeTransactions = async (
         ? entry.image.href
         : entry.properties.base64SvgDataUri || ''
     );
+
     const attributes = BytesValue.fromUTF8(
       `tags:${entry.properties.tags};metadata:${metadataString(entry)}`
     );
@@ -189,8 +195,9 @@ export const makeTransactions = async (
         uri,
         attributes,
         hash,
-        new U32Value(config.royaltiesCut),
+        new BigUIntValue(new BigNumber(config.royaltiesCut)),
         new BigUIntValue(new BigNumber(config.initialPriceOfNFT)),
+        ...(config.claimTokensAfterMint ? [new BooleanValue(true)] : []),
       ],
       gasLimit: new GasLimit(SystemConstants.MIN_TRANSACTION_GAS), // gas limit - initial value
     });
