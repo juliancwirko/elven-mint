@@ -2,6 +2,8 @@
 
 NFT minting on the Elrond blockchain using [erdjs](https://github.com/ElrondNetwork/elrond-sdk-erdjs) SDK. It requires deployed smart contract which implements `esdt_nft_create`.
 
+**[Smart Contract example which works well with it!](https://github.com/juliancwirko/elven-nft-minter-sc)**
+
 [Quick walkthrough video](https://youtu.be/ppvHPzwr-X4)
 
 This is a documentation for v3
@@ -15,7 +17,7 @@ The script relays on [nft-art-maker](https://github.com/juliancwirko/nft-art-mak
 
 #### How it works
 
-First of all elven-mint script assumes that you have deployed a smart contract which implements the `esdt_nft_create`. The createNft function should look like:
+First of all elven-mint script assumes that you have deployed a smart contract which implements the `esdt_nft_create`. (See the link to example!) The createNft function should look like:
 
 ```rust
 #[endpoint(createNft)]
@@ -32,8 +34,6 @@ fn create_nft(
 ```
 
 It also requires that you have your ESDT token (collection token/id), which it will use for NFT minting. It should also have proper roles assigned, and you'll be able to add these in the config file. Read more about the configuring ESDT for NFT minting [here](https://docs.elrond.com/developers/nft-tokens/).
-
-Good examples are in the Elrond GitHub repositories. I'll try to push some examples soon too.
 
 You would also need to have a couple of files to be able to start:
 
