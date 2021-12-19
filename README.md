@@ -2,7 +2,9 @@
 
 NFT minting on the Elrond blockchain using [erdjs](https://github.com/ElrondNetwork/elrond-sdk-erdjs) SDK. It requires deployed smart contract which implements `esdt_nft_create`.
 
-**[Smart Contract example which works well with it!](https://github.com/juliancwirko/elven-nft-minter-sc)**
+**Be aware that it automatically mints in a loop** Its purpose is to test stuff or for private use, not for NFT launches for sale. If time permits, there will be more valuable tools and adapted smart contracts for that.
+
+Smart Contract example which works well with current version of the tool: [elven-nft-minter-sc](https://github.com/juliancwirko/elven-nft-minter-sc)
 
 [Quick walkthrough video](https://youtu.be/ppvHPzwr-X4)
 
