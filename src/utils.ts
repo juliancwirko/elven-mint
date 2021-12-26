@@ -40,6 +40,9 @@ export interface Metadata {
   image: {
     href: string;
     hash: string;
+    ipfsCid?: string;
+    ipfsUri?: string;
+    fileName?: string;
   };
 }
 
@@ -91,11 +94,10 @@ export const getSmartContract = () => {
 const fileTypeMap: Record<string, string> = {
   wallet: config.walletFileName,
   metadataSummary: config.metadataFileName,
-  metadataCids: config.metadataCidsListFileName,
 };
 
 export const getFileContents = (
-  type: 'wallet' | 'metadataSummary' | 'metadataCids',
+  type: 'wallet' | 'metadataSummary',
   preventExit = false
 ) => {
   const filePath = `${baseDir}/${fileTypeMap[type]}`;
@@ -152,15 +154,15 @@ export const makeTransactions = async (
   createNftFunctionName: string,
   collectionTokenId: string
 ) => {
-  const metadata: { editions: Metadata[] } = getFileContents('metadataSummary');
-  const metadataCidsList = getFileContents('metadataCids', true);
+  const metadata: { editions: Metadata[]; metadataFilesIpfsBaseCid: string } =
+    getFileContents('metadataSummary');
 
   const metadataString = (entry: Metadata) => {
-    if (metadataCidsList) {
-      return getProperMetadataCid(metadataCidsList, entry.properties.edition);
+    if (entry.image.ipfsCid) {
+      return `${metadata.metadataFilesIpfsBaseCid}/${entry.properties.edition}.json`;
     }
-    // Fallback when you won't use 'metadataCidsList' (ipfs CIDs)
-    // metadata fields will be hardcoded and encoded using base64
+    // Fallback when you won't use ipfs and image files (ipfs CIDs)
+    // metadata fields will be hardcoded on-chain and encoded using base64
     return Buffer.from(
       JSON.stringify({
         onChainMeta: true,
@@ -175,9 +177,7 @@ export const makeTransactions = async (
     const token = BytesValue.fromUTF8(collectionTokenId);
     const name = BytesValue.fromUTF8(entry.name);
     const uri = BytesValue.fromUTF8(
-      metadataCidsList
-        ? entry.image.href
-        : entry.properties.base64SvgDataUri || ''
+      entry.image.href || entry.properties.base64SvgDataUri || ''
     );
 
     const attributes = BytesValue.fromUTF8(
