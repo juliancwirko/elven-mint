@@ -1,3 +1,6 @@
+### [4.0.1](https://github.com/juliancwirko/elven-mint/releases/tag/v4.0.1) (2022-01-10)
+- fix versions for prompt and bignumber
+
 ### [4.0.0](https://github.com/juliancwirko/elven-mint/releases/tag/v4.0.0) (2021-12-26)
 - there is no more list of metadata CIDs needed - this change is because of the nft-art-maker changes. From now on, we will use only base CID for all image files and the metadata.json. Please see nft-art-maker changelog.
 
