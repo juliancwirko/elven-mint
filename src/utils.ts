@@ -17,9 +17,9 @@ import {
   SystemConstants,
   BooleanValue,
 } from '@elrondnetwork/erdjs';
-import BigNumber from 'bignumber.js';
 import ora from 'ora';
 import prompt from 'prompt';
+import BigNumber from 'bignumber.js';
 
 import { ProcessState } from './catch-on-exit';
 import * as config from './config';
