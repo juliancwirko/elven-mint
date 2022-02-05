@@ -1,5 +1,7 @@
 ### Elven Mint v4
 
+**Considered deprecated (at least for now) in favor of [elven.tools](https://www.elven.tools)**
+
 NFT minting on the Elrond blockchain using [erdjs](https://github.com/ElrondNetwork/elrond-sdk-erdjs) SDK. It requires deployed smart contract which implements `esdt_nft_create`.
 
 **Be aware that it automatically mints in a loop** If you need a more advanced solution, which is more suited to the NFT launches, check out [elven-tools-cli](https://github.com/juliancwirko/elven-tools-cli) and the newest version of the [elven-nft-minter](https://github.com/juliancwirko/elven-nft-minter-sc).
@@ -16,9 +18,9 @@ This is a documentation for v4
 
 **Please always check and try to understand the code and possible limitations and bugs before using it for actual products**
 
-The script relays on [nft-art-maker](https://github.com/juliancwirko/nft-art-maker) output metadata.json file. Check out the repo, and you'll find more info about it.
+The script relays on [nft-art-maker v4.0.0!](https://github.com/juliancwirko/nft-art-maker/tree/v4.0.0) output metadata.json file. Check out the repo, and you'll find more info about it.
 
-It would also be possible to use it without the nft-art-maker, but you need to prepare a similar metadata.json file as [here](https://github.com/juliancwirko/nft-art-maker#output-type-configuration); you would also need to pack the files into ipfs car file and upload them. Files in the car archive example: `1.png, 1.json, 2.png, 2.json ....`.
+It would also be possible to use it without the nft-art-maker, but you need to prepare a similar metadata.json file as [here](https://github.com/juliancwirko/nft-art-maker/tree/v4.0.0#output-type-configuration); you would also need to pack the files into ipfs car file and upload them. Files in the car archive example: `1.png, 1.json, 2.png, 2.json ....`.
 
 #### How it works
 
@@ -31,7 +33,7 @@ It also requires that you have your ESDT token (collection token/id), which it w
 You would also need to have a couple of files to be able to start:
 
 1. Wallet Keystore JSON file. The one you'll get when creating a [web wallet](https://devnet-wallet.elrond.com) - it would be best to create a new one for the Smart Contract. But you can always recover and download the JSON file using [https://devnet-wallet.elrond.com/recover](https://devnet-wallet.elrond.com/recover) and your seed phrases. (There is no support for the PEM files here, but I plan to add it).
-2. You would also need to have the `metadata.json` generated using mentioned above [nft-art-maker](https://github.com/juliancwirko/nft-art-maker).
+2. You would also need to have the `metadata.json` generated using mentioned above [nft-art-maker](https://github.com/juliancwirko/nft-art-maker/tree/v4.0.0).
 3. Finally, you would need a config file `.elvenmintrc` where you need to provide a couple of crucial pieces of information. Below you'll find an example.
 
 **Important! Keep the files private, especially password and Keystore wallet files. To avoid any mistakes, you would need to write a wallet password with every script usage.**
